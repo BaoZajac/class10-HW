@@ -5,6 +5,7 @@ import json
 
 URL = "https://community-open-weather-map.p.rapidapi.com/forecast/daily"
 PARAMS = {"q": "san francisco,us", "lat": "35", "lon": "139", "cnt": "10", "units": "metric or imperial"}
+wf = None
 
 
 class WeatherForecast:
@@ -18,71 +19,63 @@ class WeatherForecast:
     def __iter__(self):
         ...
 
+    def __next__(self):
+        ...
+
+    def wczytaj_dane_o_pogodzie(self):
+        with open("history_of_weather.json", "r") as f:
+            self.saved_history = json.load(f)
+
     def items(self):
         return self.saved_history.items()
 
     def odp_o_deszczu(self, date_to_check2):
-        print(f"Opady w dniu {date_to_check2}: {self.saved_history[date_to_check2]}")
+        # print(f"Opady w dniu {date_to_check2}: {self.saved_history[date_to_check2]}")
         if self.saved_history[date_to_check2] > 0:
-            return "Będzie padać"
+            return f"{date_to_check2} -> Będzie padać"
         else:
-            return "Nie będzie padać"
+            return f"{date_to_check2} -> Nie będzie padać"
 
-    def spr_danych_o_deszczu(self, date_to_check):
-        if date_to_check in self.saved_history:
-            return self.odp_o_deszczu(date_to_check)
+    def spr_danych_o_deszczu(self, date_to_check1):
+        if date_to_check1 in self.saved_history:
+            return self.odp_o_deszczu(date_to_check1)
         else:
-            from datetime import datetime
             headers = {"X-RapidAPI-Host": "community-open-weather-map.p.rapidapi.com", "X-RapidAPI-Key": self.apikey}
             response = requests.get(URL, headers=headers, params=PARAMS)
             user_object = response.json()
             for element in user_object["list"]:
                 rain = element.get("pop", 0)
                 date_info = element["dt"]
-                day = datetime.fromtimestamp(date_info).date()
+                day = datetime.datetime.fromtimestamp(date_info).date()
                 self.saved_history[str(day)] = rain
-            if date_to_check in self.saved_history:
+            if date_to_check1 in self.saved_history:
                 with open("history_of_weather.json", "w") as f2:
                     json.dump(self.saved_history, f2)
-                return self.odp_o_deszczu(date_to_check)
+                return self.odp_o_deszczu(date_to_check1)
             else:
-                print("Nie wiem - zapytanie o datę spoza bazy")
-
-    def wczytaj_dane_o_pogodzie(self):
-        with open("history_of_weather.json", "r") as f:
-            self.saved_history = json.load(f)
-
-
-wf = WeatherForecast(sys.argv[1])
-# wf.spr_danych_o_deszczu(sys.argv[2])
-print(wf[sys.argv[2]])
-
-
-# date_to_check = sys.argv[2]
-# wf[date_to_check]
+                return f"{date_to_check1} -> Nie wiem - zapytanie o datę spoza bazy"
 
 
 if len(sys.argv) == 2 or len(sys.argv) == 3:
     wf = WeatherForecast(sys.argv[1])
     if len(sys.argv) == 2:
         date_to_check = str(datetime.datetime.now().date() + datetime.timedelta(days=1))
-    elif len(sys.argv) == 3:
+    # elif len(sys.argv) == 3:
+    else:
         date_to_check = sys.argv[2]
+    # if wf.spr_danych_o_deszczu(date_to_check) == "Nie wiem - zapytanie o datę spoza bazy":
+    #     print("Nie wiem - zapytanie o datę spoza bazy")
+    # else:
     print(wf[date_to_check])
 else:
     print("Błąd - wprowadzono niepoprawne dane wejściowe z std")
 
-# if len(sys.argv) == 3:  # podano datę na wejściu
-#     API_key = sys.argv[1]
-#     date_to_check = sys.argv[2]
-#     wf[date_to_check]    # spr_danych_o_deszczu()
-# elif len(sys.argv) == 2:  # nie podano daty na wejściu
-#     API_key = sys.argv[1]
-#     date_to_check = str(datetime.datetime.now().date() + datetime.timedelta(days=1))
-#     spr_danych_o_deszczu()
-# else:
-#     print("Błąd - wprowadzono niepoprawne dane wejściowe z std")
-#
-# wf = WeatherForecast()
-# print(wf["2022-04-01"])
+print("pogoda jest znana dla następujących terminów: ")
+print(wf)                       #TODO: rozwiązać to
 
+if wf:
+    print("Znane informacje o deszczu to:")
+    lista_deszczu = []
+    for idx in wf.items():
+        lista_deszczu.append(idx)
+    print(lista_deszczu)
