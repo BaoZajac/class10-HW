@@ -16,11 +16,20 @@ class WeatherForecast:
     def __getitem__(self, date):
         return self.spr_danych_o_deszczu(date)
 
-    def __iter__(self):
-        ...
+    # def __iter__(self):
+    #     a = self.saved_history.keys()
+    #     return a
 
-    def __next__(self):
-        ...
+    # def __next__(self):
+    #     a = self.saved_history.keys()
+    #     return a
+    #     if element in self.user_object["list"]:
+    #
+    # for element in user_object["list"]:
+    #     rain = element.get("pop", 0)
+    #     date_info = element["dt"]
+    #     day = datetime.datetime.fromtimestamp(date_info).date()
+    #     self.saved_history[str(day)] = rain
 
     def wczytaj_dane_o_pogodzie(self):
         with open("history_of_weather.json", "r") as f:
@@ -31,6 +40,7 @@ class WeatherForecast:
 
     def odp_o_deszczu(self, date_to_check2):
         # print(f"Opady w dniu {date_to_check2}: {self.saved_history[date_to_check2]}")
+        # print(self.saved_history.keys())
         if self.saved_history[date_to_check2] > 0:
             return f"{date_to_check2} -> Będzie padać"
         else:
@@ -79,3 +89,9 @@ if wf:
     for idx in wf.items():
         lista_deszczu.append(idx)
     print(lista_deszczu)
+
+
+# slownik = {"a": 1, "b": 2}
+# print(slownik)
+# print(slownik.keys())
+# # print(slownik[0])
